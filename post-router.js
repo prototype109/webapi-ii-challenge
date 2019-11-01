@@ -52,4 +52,19 @@ postRouter.get('/', (req, res) => {
         });
 });
 
+postRouter.get('/:id', async (req, res) => {
+    const id = req.params.id;
+
+    try{
+        const postArr = await db.findById(id);
+        if(postArr.length > 0)
+            res.status(200).json(postArr);
+        else
+            res.status(404).json({ message: "The post with the specified ID does not exist." })
+    }
+    catch{
+        res.status(500).end();
+    }
+});
+
 module.exports = postRouter;
