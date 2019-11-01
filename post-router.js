@@ -21,7 +21,7 @@ postRouter.post('/', (req, res) => {
 
 postRouter.post('/:id/comments', (req, res) => {
     const reqBody = req.body;
-    const id = req.params.id;
+    const id = req.params.id || undefined;
 
     db.insertComment({text: reqBody.text, post_id: id})
         .then(comment => {
@@ -83,6 +83,30 @@ postRouter.get('/:id/comments', async (req, res) => {
     catch{
         res.status(500).json({ error: "The comments information could not be retrieved." });
     }
-})
+});
+
+postRouter.delete('/:id', async (req, res) => {
+    const id = req.params.id;
+
+    try{
+        const postArr = await db.findById(id);
+        if(postArr.length > 0){
+            db.remove(id)
+                .then(deletedPost => {
+                    res.status(200).json({ postArr });
+                })
+                .catch(err => {
+                    res.status(500).json({ message: "Should not be getting here!!!!" });
+                })
+        }
+        else
+            res.status(404).json({ message: "The post with the specified ID does not exist." })
+    }
+    catch{
+        res.status(500).json({ error: "The post could not be removed" });
+    }
+
+    
+});
 
 module.exports = postRouter;
