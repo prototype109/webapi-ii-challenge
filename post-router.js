@@ -7,23 +7,26 @@ const postRouter = express.Router();
 postRouter.post("/", (req, res) => {
   const reqBody = req.body;
 
-  db.insert(reqBody)
-    .then(post => {
-      if (reqBody.title && reqBody.contents) res.status(201).json({ reqBody });
-      else
-        res
-          .status(400)
-          .json({
-            errorMessage: "Please provide title and contents for the post."
-          });
-    })
-    .catch(err => {
-      res
-        .status(500)
-        .json({
+  if (
+    !reqBody.title ||
+    !reqBody.contents ||
+    reqBody.title === "" ||
+    reqBody.contents === ""
+  ) {
+    res.status(400).json({
+      errorMessage: "Please provide title and contents for the post."
+    });
+  } else {
+    db.insert(reqBody)
+      .then(post => {
+        res.status(201).json({ reqBody });
+      })
+      .catch(err => {
+        res.status(500).json({
           error: "There was an error while saving the post to the database"
         });
-    });
+      });
+  }
 });
 
 postRouter.post("/:id/comments", async (req, res) => {
@@ -37,11 +40,9 @@ postRouter.post("/:id/comments", async (req, res) => {
   } catch {
     if (reqBody.text) {
       if (postId.err)
-        res
-          .status(500)
-          .json({
-            error: "There was an error while saving the comment to the database"
-          });
+        res.status(500).json({
+          error: "There was an error while saving the comment to the database"
+        });
       else
         res
           .status(404)
@@ -139,11 +140,9 @@ postRouter.put("/:id", async (req, res) => {
           .status(404)
           .json({ message: "The post with the specified ID does not exist." });
       } else
-        res
-          .status(400)
-          .json({
-            errorMessage: "Please provide title and contents for the post."
-          });
+        res.status(400).json({
+          errorMessage: "Please provide title and contents for the post."
+        });
     }
   } catch {
     res
